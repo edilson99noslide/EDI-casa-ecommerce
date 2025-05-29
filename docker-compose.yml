@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: edi_casa_app
+        ports:
+            - "8000:8000"
+        volumes:
+            - .:/var/www
+        depends_on:
+            - db
+        environment:
+            DB_CONNECTION: pgsql
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_DATABASE: edi_casa
+            DB_USERNAME: user
+            DB_PASSWORD: password
+
+    db:
+        image: postgres:15
+        container_name: pgsql
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_DB: edi_casa
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+volumes:
+    pgdata:
