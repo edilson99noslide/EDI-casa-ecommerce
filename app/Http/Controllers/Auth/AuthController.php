@@ -33,9 +33,21 @@ class AuthController extends Controller {
                 'message' => 'Login ou senha incorretos.'
             ], 401);
 
-        return response()->json(
-            $this->authService->tokenResponse($token)
+        $cookie = cookie(
+            name: 'token',
+            value: $token,
+            minutes: 60 * 24,
+            path: '/',
+            domain: null,
+            secure: true,
+            httpOnly: true,
+            sameSite: 'Strict'
         );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login efetuado com sucesso.'
+        ])->cookie($cookie);
     }
 
     /**
