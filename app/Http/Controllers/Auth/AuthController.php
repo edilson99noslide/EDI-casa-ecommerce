@@ -33,21 +33,27 @@ class AuthController extends Controller {
                 'message' => 'Login ou senha incorretos.'
             ], 401);
 
-        $cookie = cookie(
-            name: 'token',
-            value: $token,
-            minutes: 60 * 24,
-            path: '/',
-            domain: null,
-            secure: true,
-            httpOnly: true,
-            sameSite: 'Strict'
-        );
+        $user = Auth::guard('api')->user();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login efetuado com sucesso.'
-        ])->cookie($cookie);
+        if(!$user->last_login_at) {
+            $user->last_login_at = now();
+            $user->save();
+
+            return $this->setCookie($token);
+        }
+
+        if($user->two_factor_enabled) {
+            $user->two_factor_validated_at = null;
+
+            return response()->json([
+                'success'             => true,
+                'message'             => '2FA necessário para concluir o login.',
+                'two_factor_required' => true,
+                'token'               => $token,
+            ]);
+        }
+
+        return $this->setCookie($token);
     }
 
     /**
@@ -67,6 +73,8 @@ class AuthController extends Controller {
      * @return JsonResponse
      */
     public function me(): JsonResponse {
+        $user = Auth::guard('api')->user();
+
         return response()->json(Auth::guard('api')->user());
     }
 
@@ -104,5 +112,23 @@ class AuthController extends Controller {
             'success' => true,
             'message' => 'Senha alterada com sucesso.'
         ]);
+    }
+
+    public function setCookie(string $token): JsonResponse {
+        $cookie = cookie(
+            name: 'token',
+            value: $token,
+            minutes: 60 * 24,
+            path: '/',
+            domain: null,
+            secure: true,
+            httpOnly: true,
+            sameSite: 'Strict'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login efetuado com sucesso.'
+        ])->cookie($cookie);
     }
 }

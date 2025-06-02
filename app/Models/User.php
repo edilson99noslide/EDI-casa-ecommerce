@@ -24,6 +24,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'google2fa_secret',
         'two_factor_enabled',
+        'last_login_at',
+        'two_factor_validated_at'
     ];
 
     /**
@@ -48,6 +50,7 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at'  => 'datetime',
             'password'           => 'hashed',
             'two_factor_enabled' => 'boolean',
+            'first_login'        => 'boolean',
         ];
     }
 

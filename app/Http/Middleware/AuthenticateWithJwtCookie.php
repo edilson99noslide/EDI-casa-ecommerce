@@ -16,7 +16,7 @@ class AuthenticateWithJwtCookie
             return response()->json([
                 'success' => false,
                 'message' => 'Não foi possivel autenticar com o token.'
-            ]);
+            ], 401);
 
         try {
             JWTAuth::setToken($token)->authenticate();
