@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ValidateTwoFactorRequest;
+use App\Services\AuthService;
 use App\UseCases\TwoFactor\DisableTwoFactorUseCase;
 use App\UseCases\TwoFactor\EnableTwoFactorUseCase;
 use App\UseCases\TwoFactor\ValidateTwoFactorUseCase;
@@ -15,6 +16,7 @@ class TwoFactorController extends Controller {
         private EnableTwoFactorUseCase $enableTwoFactorUseCase,
         private DisableTwoFactorUseCase $disableTwoFactorUseCase,
         private ValidateTwoFactorUseCase $validateTwoFactorUseCase,
+        private AuthService $authService,
     ) {}
 
     public function enableTwoFactor(): JsonResponse {
@@ -40,13 +42,17 @@ class TwoFactorController extends Controller {
 
     public function validateTwoFactor(ValidateTwoFactorRequest $request): JsonResponse {
         $user = Auth::user();
+
         if(!$user->two_factor_enabled)
             return response()->json([
                 'success' => false,
                 'message' => 'Usuário não possui autenticação de dois fatores.',
             ]);
 
-        $isValid = $this->validateTwoFactorUseCase->handle($user, $request->get('2fa_code'));
+        $isValid = $this->validateTwoFactorUseCase->handle($user, $request->get('code'));
+
+        if($isValid)
+            return $this->authService->setCookie();
 
         return response()->json([
            'success' => $isValid,

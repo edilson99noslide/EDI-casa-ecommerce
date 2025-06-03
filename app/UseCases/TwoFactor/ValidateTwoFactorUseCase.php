@@ -19,6 +19,13 @@ class ValidateTwoFactorUseCase {
         if(!$secret)
             return false;
 
-        return $this->google2FA->verifyKey($secret, $code);
+        if($this->google2FA->verifyKey($secret, $code)) {
+            $user->two_factor_validated_at = now();
+            $user->save();
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -39,11 +39,14 @@ class AuthController extends Controller {
             $user->last_login_at = now();
             $user->save();
 
-            return $this->setCookie($token);
+            return $this->authService->setCookie();
         }
 
         if($user->two_factor_enabled) {
             $user->two_factor_validated_at = null;
+            $user->save();
+
+            $token = $this->authService->createTemporaryToken($request->validated());
 
             return response()->json([
                 'success'             => true,
@@ -53,7 +56,7 @@ class AuthController extends Controller {
             ]);
         }
 
-        return $this->setCookie($token);
+        return $this->authService->setCookie();
     }
 
     /**
@@ -112,23 +115,5 @@ class AuthController extends Controller {
             'success' => true,
             'message' => 'Senha alterada com sucesso.'
         ]);
-    }
-
-    public function setCookie(string $token): JsonResponse {
-        $cookie = cookie(
-            name: 'token',
-            value: $token,
-            minutes: 60 * 24,
-            path: '/',
-            domain: null,
-            secure: true,
-            httpOnly: true,
-            sameSite: 'Strict'
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Login efetuado com sucesso.'
-        ])->cookie($cookie);
     }
 }

@@ -29,7 +29,7 @@ Route::prefix('auth')->group(function () {
     });
 
     // 2FA
-    Route::prefix('/2fa')->middleware(AuthenticateWithJwtCookie::class)->group(function () {
+    Route::prefix('/2fa')->middleware('auth:api')->group(function () {
         Route::post('/enable', [TwoFactorController::class, 'enableTwoFactor']);
         Route::post('/disable', [TwoFactorController::class, 'disableTwoFactor']);
         Route::post('/validate', [TwoFactorController::class, 'validateTwoFactor']);

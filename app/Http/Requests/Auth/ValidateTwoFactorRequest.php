@@ -11,7 +11,7 @@ class ValidateTwoFactorRequest extends FormRequest {
 
     public function rules() {
         return [
-            '2fa_code' => 'required|string|size:6'
+            'code' => 'required|string|size:6'
         ];
     }
 }
